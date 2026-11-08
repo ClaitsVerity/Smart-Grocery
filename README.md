@@ -98,7 +98,7 @@ c:\ICT-Kelas12\P12-Smart-Grocery\
 
 ### 🌐 Akses Live di Internet:
 Aplikasi sudah ter-deploy langsung di Firebase Hosting:
-👉 **[https://gro-pilot.web.app](https://gro-pilot.web.app)** (atau `https://gro-pilot.firebaseapp.com`)
+👉 **[https://smart-brocery.web.app](https://smart-brocery.web.app)** (dan `https://smart-brocery.firebaseapp.com`)
 
 ### 💻 Jalankan di Server Lokal:
 ```bash
