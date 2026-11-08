@@ -94,10 +94,13 @@ c:\ICT-Kelas12\P12-Smart-Grocery\
 
 ---
 
-## 🚀 Cara Menjalankan Aplikasi
+## 🚀 Live Demo & Cara Menjalankan Aplikasi
 
-Aplikasi dapat dijalankan menggunakan server lokal:
+### 🌐 Akses Live di Internet:
+Aplikasi sudah ter-deploy langsung di Firebase Hosting:
+👉 **[https://gro-pilot.web.app](https://gro-pilot.web.app)** (atau `https://gro-pilot.firebaseapp.com`)
 
+### 💻 Jalankan di Server Lokal:
 ```bash
 # Jalankan server lokal
 node server.js
