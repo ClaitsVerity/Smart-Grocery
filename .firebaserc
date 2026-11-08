@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "smart-brocery"
+    "default": "smart-brocery",
+    "smart-brocery": "smart-brocery",
+    "gro-pilot": "gro-pilot"
   }
 }
