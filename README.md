@@ -39,7 +39,25 @@ Aplikasi web mobile (**Progressive Web App - PWA**) berarsitektur *mobile-first*
 | **F-03** | **Kalkulator Diskon Bertingkat** | ✅ Selesai | Mendukung diskon tunggal (misal 20%), diskon bertingkat (misal **50% + 20%** atau **30% + 10%**), dan potongan tunai langsung. Perhitungan bertingkat dihitung **secara berurutan** terhadap harga setelah diskon sebelumnya: <br>`Tahap 1 = Harga * (1 - D1%)`<br>`Tahap 2 = Tahap 1 * (1 - D2%)`<br>Bukan sekadar penjumlahan naif! Disertai rincian penghematan di [`js/discount.js`](file:///c:/ICT-Kelas12/P12-Smart-Grocery/js/discount.js). |
 | **F-04** | **Komparator Harga Realtime** | ✅ Selesai | Membandingkan harga yang diinput dengan database bulan sebelumnya: <br>🔴 **Panah Merah ke Atas (↑)** jika harga naik (misal: *Naik Rp 2.500 (+3.6%)*).<br>🟢 **Panah Hijau ke Bawah (↓)** jika harga turun (misal: *Turun Rp 2.000 (-5.3%)*).<br>⚪ **Tanda Sama Dengan (=)** jika harga stabil/sama.<br>🔵 **Badge Item Baru (+)** jika belum ada data bulan lalu. Diatur di [`js/comparator.js`](file:///c:/ICT-Kelas12/P12-Smart-Grocery/js/comparator.js). |
 | **F-05** | **Pengendali Anggaran (Budget Safety)** | ✅ Selesai | Input limit batas maksimal uang. Total keranjang terus dipantau secara *realtime* dengan indikator 3 tahap visual: <br>• **Aman (Hijau)**: < 75% budget.<br>• **Waspada (Kuning/Oranye)**: 75% - 90% budget.<br>• **Bahaya / Over Budget (Merah)**: > 90% atau melampaui limit, disertai banner peringatan dan getaran haptic. Termasuk fitur *Safety Buffer* cadangan kasir. Diatur di [`js/budget.js`](file:///c:/ICT-Kelas12/P12-Smart-Grocery/js/budget.js). |
-| **F-06** | **Riwayat & Database Belanja** | ✅ Selesai | Penyimpanan data lokal terstruktur menggunakan `localStorage`. Fitur **"Selesaikan Belanja"** menyimpan struk ke tab Riwayat dan **otomatis memperbarui database harga patokan** barang untuk perbandingan transaksi bulan berikutnya. Dilengkapi fitur *Backup JSON* dan *Repeat Order* di [`js/history.js`](file:///c:/ICT-Kelas12/P12-Smart-Grocery/js/history.js). |
+| **F-06** | **Riwayat & Database Belanja** | ✅ Selesai | Penyimpanan data lokal terstruktur menggunakan `localStorage` dan tersinkronisasi realtime dengan **Firebase Cloud Firestore**. Fitur **"Selesaikan Belanja"** menyimpan struk ke tab Riwayat dan **otomatis memperbarui database harga patokan** barang untuk perbandingan transaksi bulan berikutnya. Dilengkapi fitur *Backup JSON*, *Repeat Order*, dan *Cloud Sync* di [`js/history.js`](file:///c:/ICT-Kelas12/P12-Smart-Grocery/js/history.js) & [`js/firebase-config.js`](file:///c:/ICT-Kelas12/P12-Smart-Grocery/js/firebase-config.js). |
+
+---
+
+## 🔥 Integrasi Firebase SDK & Cloud Firestore Database
+
+Aplikasi telah terintegrasi penuh dengan **Firebase Modular JavaScript SDK v11 / v13** dan database realtime **Cloud Firestore**:
+
+- **Project ID**: `smart-brocery`
+- **Konfigurasi SDK**: Tersedia dalam mode `npm install firebase` dan browser native via `<script type="importmap">` + `<script type="module" src="./js/firebase-config.js">`.
+- **Koleksi Database Firestore**:
+  1. `cart_items`: Menyimpan item troli belanja aktif (nama, kuantitas, harga, diskon, status troli).
+  2. `settings/budget`: Menyimpan limit anggaran bulanan, persentase *safety buffer*, dan nama periode belanja.
+  3. `price_history`: Database patokan harga bulan lalu untuk komparator harga otomatis (F-04).
+  4. `transactions`: Arsip struk pembelanjaan setiap kali pengguna menyelesaikan belanja (F-06).
+- **Fitur Sinkronisasi Realtime**:
+  - Menggunakan `onSnapshot` Firestore sehingga perubahan data di satu perangkat atau langsung di Firebase Console akan langsung ter-update di aplikasi tanpa perlu *refresh*.
+  - Dilengkapi *badge status* indikator di status bar (`Cloud Synced` / `Offline`) dan kartu kontrol sinkronisasi manual di Tab Riwayat.
+  - Tetap mendukung mode offline penuh (*offline caching* PWA + `localStorage`) saat berada di *basement* supermarket tanpa sinyal.
 
 ---
 
@@ -48,17 +66,19 @@ Aplikasi web mobile (**Progressive Web App - PWA**) berarsitektur *mobile-first*
 ```text
 c:\ICT-Kelas12\P12-Smart-Grocery\
 │
-├── index.html            # Shell aplikasi web mobile PWA dengan viewport smartphone
+├── index.html            # Shell aplikasi web mobile PWA dengan viewport smartphone & Firebase importmap
 ├── manifest.json         # Konfigurasi PWA standalone & shortcuts
 ├── sw.js                 # Service worker untuk offline caching
 ├── server.js             # Server HTTP lokal zero-dependency
+├── package.json          # Konfigurasi dependensi npm (Firebase SDK)
 ├── README.md             # Dokumentasi teknis proyek
 │
 ├── css/
 │   └── style.css         # Styling mobile-first, glassmorphism, responsive 430px
 │
 ├── js/
-│   ├── data.js           # Database awal, kategori, satuan, & data contoh anak kos
+│   ├── firebase-config.js# Inisialisasi Firebase SDK & integrasi Cloud Firestore
+│   ├── data.js           # Database awal, kategori, satuan, & handler sync data
 │   ├── discount.js       # Engine kalkulator diskon bertingkat (F-03)
 │   ├── comparator.js     # Engine komparator harga bulan lalu ↑, ↓, = (F-04)
 │   ├── budget.js         # Engine budget safety controller (F-05)

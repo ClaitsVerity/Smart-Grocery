@@ -1,0 +1,26 @@
+{
+  "name": "p12-smart-grocery",
+  "version": "1.0.0",
+  "description": "Aplikasi web mobile (**Progressive Web App - PWA**) berarsitektur *mobile-first* bergaya aplikasi *native* smartphone yang dirancang khusus untuk seorang **siswa rantau / anak kos** saat belanja bulanan di supermarket sambil mendorong troli belanja.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "deploy": "firebase deploy --only hosting"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://ClaitsVerity@github.com/ClaitsVerity/Smart-Grocery.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ClaitsVerity/Smart-Grocery/issues"
+  },
+  "homepage": "https://github.com/ClaitsVerity/Smart-Grocery#readme",
+  "dependencies": {
+    "firebase": "^13.2.0"
+  }
+}

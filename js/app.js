@@ -24,6 +24,7 @@
     initPriceDbModal();
     initQuickBudgetModal();
     initDataBackupTools();
+    initFirebaseSyncUI();
 
     // Initialize Cart
     if (window.SmartGroceryCart) {
@@ -140,6 +141,15 @@
     elements.priceDbItemsList = document.getElementById('priceDbItemsList');
     elements.btnExportData = document.getElementById('btnExportData');
     elements.btnResetDemoData = document.getElementById('btnResetDemoData');
+
+    // Firebase Elements
+    elements.firebaseStatusBadge = document.getElementById('firebaseStatusBadge');
+    elements.firebaseStatusText = document.getElementById('firebaseStatusText');
+    elements.firebaseTabStatusBadge = document.getElementById('firebaseTabStatusBadge');
+    elements.firebaseTabStatusText = document.getElementById('firebaseTabStatusText');
+    elements.firebaseLastSyncInfo = document.getElementById('firebaseLastSyncInfo');
+    elements.btnSyncFirestore = document.getElementById('btnSyncFirestore');
+    elements.btnUploadToCloud = document.getElementById('btnUploadToCloud');
 
     // Anggaran Tab
     elements.radialGaugeBar = document.getElementById('radialGaugeBar');
@@ -1252,6 +1262,98 @@
         }
       });
     }
+  }
+
+  // ==========================================================================
+  // FIREBASE CLOUD FIRESTORE INTEGRATION
+  // ==========================================================================
+  function initFirebaseSyncUI() {
+    window.addEventListener('smartgrocery:firebase-status', (e) => {
+      const detail = e.detail || {};
+      updateFirebaseStatusUI(detail);
+    });
+
+    window.addEventListener('smartgrocery:data-changed', (e) => {
+      if (window.SmartGroceryCart) {
+        window.SmartGroceryCart.init();
+      }
+      renderAll();
+    });
+
+    if (elements.btnSyncFirestore) {
+      elements.btnSyncFirestore.addEventListener('click', async () => {
+        if (!window.SmartGroceryFirebase) {
+          showToast('Firebase SDK belum siap', 'warning');
+          return;
+        }
+        showToast('Menyinkronkan dari Cloud Firestore...', 'info');
+        const ok = await window.SmartGroceryFirebase.pullAllCloudData();
+        if (ok) {
+          showToast('Data Firestore berhasil disinkronkan!', 'success');
+          renderAll();
+        } else {
+          showToast('Gagal sinkron Firestore', 'warning');
+        }
+      });
+    }
+
+    if (elements.btnUploadToCloud) {
+      elements.btnUploadToCloud.addEventListener('click', async () => {
+        if (!window.SmartGroceryFirebase) {
+          showToast('Firebase SDK belum siap', 'warning');
+          return;
+        }
+        showToast('Mengunggah data lokal ke Firestore...', 'info');
+        const ok = await window.SmartGroceryFirebase.pushAllLocalData();
+        if (ok) {
+          showToast('Data berhasil diunggah ke Cloud Firestore!', 'success');
+        } else {
+          showToast('Gagal mengunggah data', 'warning');
+        }
+      });
+    }
+  }
+
+  function updateFirebaseStatusUI(detail) {
+    const status = detail.status || 'offline';
+    const badge = elements.firebaseStatusBadge;
+    const tabBadge = elements.firebaseTabStatusBadge;
+    const syncInfo = elements.firebaseLastSyncInfo;
+
+    if (badge) {
+      badge.className = 'status-badge-cloud ' + (status === 'connected' || status === 'synced' ? 'synced' : status === 'connecting' ? 'connecting' : 'offline');
+      if (status === 'connected' || status === 'synced') {
+        badge.innerHTML = '<i data-lucide="cloud" style="width:10px;height:10px;"></i> <span id="firebaseStatusText">Cloud</span>';
+      } else if (status === 'connecting') {
+        badge.innerHTML = '<i data-lucide="refresh-cw" style="width:10px;height:10px;"></i> <span id="firebaseStatusText">Konek</span>';
+      } else {
+        badge.innerHTML = '<i data-lucide="cloud-off" style="width:10px;height:10px;"></i> <span id="firebaseStatusText">Lokal</span>';
+      }
+    }
+
+    if (tabBadge) {
+      if (status === 'connected' || status === 'synced') {
+        tabBadge.className = 'budget-chip-status safe';
+        tabBadge.innerHTML = '<i data-lucide="check" style="width:10px;height:10px;"></i> Terkoneksi';
+      } else if (status === 'connecting') {
+        tabBadge.className = 'budget-chip-status warning';
+        tabBadge.innerHTML = '<i data-lucide="refresh-cw" style="width:10px;height:10px;"></i> Menyinkronkan';
+      } else {
+        tabBadge.className = 'budget-chip-status danger';
+        tabBadge.innerHTML = '<i data-lucide="alert-circle" style="width:10px;height:10px;"></i> Offline / Lokal';
+      }
+    }
+
+    if (syncInfo) {
+      if (detail.lastSynced) {
+        const timeStr = new Date(detail.lastSynced).toLocaleTimeString('id-ID');
+        syncInfo.textContent = `Terakhir disinkronkan: ${timeStr} • ${detail.message || 'Data up-to-date'}`;
+      } else if (detail.message) {
+        syncInfo.textContent = detail.message;
+      }
+    }
+
+    initLucideIcons();
   }
 
   // Bottom Sheet Modal Helpers

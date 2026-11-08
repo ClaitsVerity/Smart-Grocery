@@ -25,6 +25,19 @@
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
+  <!-- Firebase Modular SDK Import Map -->
+  <script type="importmap">
+  {
+    "imports": {
+      "firebase/app": "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js",
+      "firebase/firestore": "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js"
+    }
+  }
+  </script>
+
+  <!-- Firebase Initialization & Firestore Integration -->
+  <script type="module" src="./js/firebase-config.js"></script>
+
   <!-- Main Stylesheet -->
   <link rel="stylesheet" href="./css/style.css">
 </head>
@@ -41,6 +54,10 @@
       <header class="mobile-status-bar">
         <span class="status-time" id="statusClock">19:30</span>
         <div class="status-icons">
+          <span class="status-badge-cloud" id="firebaseStatusBadge" title="Status Firebase Cloud Firestore">
+            <i data-lucide="cloud" style="width:10px;height:10px;"></i>
+            <span id="firebaseStatusText">Cloud</span>
+          </span>
           <span class="status-badge-pwa"><i data-lucide="zap" style="width:10px;height:10px;"></i> PWA</span>
           <i data-lucide="wifi" style="width:13px;height:13px;"></i>
           <i data-lucide="battery-charging" style="width:14px;height:14px;color:#10b981;"></i>
@@ -197,6 +214,30 @@
             </div>
             <h3 class="empty-title">Belum Ada Riwayat Belanja</h3>
             <p class="empty-desc">Setelah selesai belanja di supermarket, tekan "Selesaikan Belanja" di tab Belanja untuk menyimpan struk dan memperbarui database harga bulan depan.</p>
+          </div>
+
+          <!-- Firebase Cloud Firestore Sync Card -->
+          <div class="safety-buffer-card" style="margin-top: 10px;">
+            <div class="buffer-header" style="display:flex;justify-content:space-between;align-items:center;">
+              <span class="buffer-title"><i data-lucide="cloud-lightning" style="width:14px;height:14px;color:#f59e0b;"></i> Firebase Cloud Firestore</span>
+              <span class="budget-chip-status safe" id="firebaseTabStatusBadge" style="font-size:9px;padding:2px 8px;">
+                <i data-lucide="check" style="width:10px;height:10px;"></i> <span id="firebaseTabStatusText">Terkoneksi</span>
+              </span>
+            </div>
+            <p style="font-size:11px;color:var(--text-muted);line-height:1.4;margin-top:4px;">
+              Database realtime Firebase terhubung (Project: <strong style="color:var(--text-white);">smart-brocery</strong>). Data keranjang, anggaran, dan patokan harga tersimpan otomatis di Cloud Firestore.
+            </p>
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <button class="btn-history-repeat" id="btnSyncFirestore" style="background:rgba(16,185,129,0.15);border-color:rgba(16,185,129,0.3);color:#34d399;flex:1;">
+                <i data-lucide="refresh-cw" style="width:13px;height:13px;"></i> Sinkronkan
+              </button>
+              <button class="btn-history-repeat" id="btnUploadToCloud" style="background:rgba(245,158,11,0.15);border-color:rgba(245,158,11,0.3);color:#fbbf24;flex:1;">
+                <i data-lucide="upload-cloud" style="width:13px;height:13px;"></i> Upload Lokal
+              </button>
+            </div>
+            <div style="margin-top:6px;font-size:10px;color:var(--text-muted);" id="firebaseLastSyncInfo">
+              Status: Memeriksa koneksi Cloud Firestore...
+            </div>
           </div>
 
           <!-- Data Backup & Maintenance Tools -->

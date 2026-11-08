@@ -172,6 +172,32 @@ html, body {
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
+.status-badge-cloud {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  transition: all 0.25s ease;
+}
+.status-badge-cloud.synced {
+  background: rgba(16, 185, 129, 0.18);
+  color: #34d399;
+}
+.status-badge-cloud.connecting {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
+}
+.status-badge-cloud.offline {
+  background: rgba(148, 163, 184, 0.18);
+  color: #94a3b8;
+}
 
 /* App Header */
 .app-header {

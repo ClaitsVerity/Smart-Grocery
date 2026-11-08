@@ -253,6 +253,9 @@
     },
     saveBudget(budgetObj) {
       this.set(STORAGE_KEYS.BUDGET, budgetObj);
+      if (typeof window !== 'undefined' && window.SmartGroceryFirebase && window.SmartGroceryFirebase.isReady) {
+        window.SmartGroceryFirebase.saveBudget(budgetObj);
+      }
     },
     // Cart
     getCart() {
@@ -260,6 +263,9 @@
     },
     saveCart(cartArray) {
       this.set(STORAGE_KEYS.CART, cartArray);
+      if (typeof window !== 'undefined' && window.SmartGroceryFirebase && window.SmartGroceryFirebase.isReady) {
+        window.SmartGroceryFirebase.syncAllCart(cartArray);
+      }
     },
     // Price history DB (F-04, F-06)
     getPriceHistory() {
@@ -267,6 +273,9 @@
     },
     savePriceHistory(historyArray) {
       this.set(STORAGE_KEYS.PRICE_HISTORY, historyArray);
+      if (typeof window !== 'undefined' && window.SmartGroceryFirebase && window.SmartGroceryFirebase.isReady) {
+        window.SmartGroceryFirebase.syncAllPriceHistory(historyArray);
+      }
     },
     // Past Transactions Logs
     getTransactions() {
@@ -274,6 +283,9 @@
     },
     saveTransactions(trxArray) {
       this.set(STORAGE_KEYS.TRANSACTIONS, trxArray);
+      if (typeof window !== 'undefined' && window.SmartGroceryFirebase && window.SmartGroceryFirebase.isReady && trxArray.length > 0) {
+        window.SmartGroceryFirebase.saveTransaction(trxArray[0]);
+      }
     },
     // Reset all to seed
     resetAllToDefault() {
@@ -281,6 +293,9 @@
       this.set(STORAGE_KEYS.CART, SEED_CART);
       this.set(STORAGE_KEYS.PRICE_HISTORY, SEED_PRICE_HISTORY);
       this.set(STORAGE_KEYS.TRANSACTIONS, SEED_TRANSACTIONS);
+      if (typeof window !== 'undefined' && window.SmartGroceryFirebase && window.SmartGroceryFirebase.isReady) {
+        window.SmartGroceryFirebase.pushAllLocalData();
+      }
     },
     getCategories() {
       return DEFAULT_CATEGORIES;

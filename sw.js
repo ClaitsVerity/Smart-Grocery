@@ -1,5 +1,5 @@
 // Smart Grocery PWA Service Worker
-const CACHE_NAME = 'smart-grocery-v1.0.0';
+const CACHE_NAME = 'smart-grocery-v1.1.0';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -8,6 +8,7 @@ const STATIC_ASSETS = [
   './icons/icon.svg',
   './icons/icon-192.png',
   './icons/icon-512.png',
+  './js/firebase-config.js',
   './js/data.js',
   './js/discount.js',
   './js/comparator.js',
@@ -43,8 +44,9 @@ self.addEventListener('activate', (event) => {
 
 // Fetch: Network first with Cache fallback for dynamic, or Stale While Revalidate
 self.addEventListener('fetch', (event) => {
-  // Only handle GET requests
+  // Only handle GET requests and skip external Firestore / Google APIs
   if (event.request.method !== 'GET') return;
+  if (event.request.url.includes('firestore.googleapis.com') || event.request.url.includes('firebaseio.com')) return;
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
