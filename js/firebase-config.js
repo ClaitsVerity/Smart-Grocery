@@ -40,7 +40,8 @@ const COLLECTIONS = {
 };
 
 const DOCS = {
-  BUDGET: 'budget'
+  BUDGET: 'budget',
+  SESSION: 'session'
 };
 
 // Global Firebase Manager for Smart Grocery
@@ -104,12 +105,20 @@ const FirebaseManager = {
       const priceSnap = await getDocs(collection(db, COLLECTIONS.PRICE_HISTORY));
       const trxSnap = await getDocs(collection(db, COLLECTIONS.TRANSACTIONS));
 
-      // 1. Budget
+      // 1. Budget & Session
       if (budgetDocSnap.exists() && window.SmartGroceryData) {
         window.SmartGroceryData.set('sg_budget_config', budgetDocSnap.data());
       } else if (window.SmartGroceryData) {
         const localBudget = window.SmartGroceryData.getBudget();
         if (localBudget) await this.saveBudget(localBudget);
+      }
+
+      const sessionSnap = await getDoc(doc(db, COLLECTIONS.SETTINGS, DOCS.SESSION));
+      if (sessionSnap.exists() && window.SmartGroceryData) {
+        window.SmartGroceryData.set('sg_shopping_session', sessionSnap.data());
+      } else if (window.SmartGroceryData) {
+        const localSession = window.SmartGroceryData.getSession();
+        if (localSession) await this.saveSession(localSession);
       }
 
       // 2. Cart
@@ -257,6 +266,24 @@ const FirebaseManager = {
       console.warn('[Firebase] Price history listener error:', err);
     });
     this.activeListeners.push(unsubPrice);
+
+    // 5. Shopping Session Listener (Store & Date)
+    const unsubSession = onSnapshot(doc(db, COLLECTIONS.SETTINGS, DOCS.SESSION), (docSnap) => {
+      if (this.syncDisabledTemporarily) return;
+
+      if (docSnap.exists() && window.SmartGroceryData) {
+        const cloudSession = docSnap.data();
+        const currentSession = window.SmartGroceryData.getSession();
+
+        if (JSON.stringify(cloudSession) !== JSON.stringify(currentSession)) {
+          window.SmartGroceryData.set('sg_shopping_session', cloudSession);
+          this.notifyDataChanged('session', cloudSession);
+        }
+      }
+    }, (err) => {
+      console.warn('[Firebase] Session listener error:', err);
+    });
+    this.activeListeners.push(unsubSession);
   },
 
   /**
@@ -351,6 +378,24 @@ const FirebaseManager = {
   },
 
   /**
+   * Save shopping session (store & date) to Firestore
+   */
+  async saveSession(sessionObj) {
+    if (!sessionObj) return;
+    try {
+      this.syncDisabledTemporarily = true;
+      const cleanData = sanitize(sessionObj);
+      cleanData.updatedAt = new Date().toISOString();
+      await setDoc(doc(db, COLLECTIONS.SETTINGS, DOCS.SESSION), cleanData);
+      this.lastSynced = new Date();
+    } catch (err) {
+      console.error('[Firebase] Error saving session info:', err);
+    } finally {
+      setTimeout(() => { this.syncDisabledTemporarily = false; }, 300);
+    }
+  },
+
+  /**
    * Save completed transaction receipt to Firestore
    */
   async saveTransaction(transaction) {
@@ -410,11 +455,13 @@ const FirebaseManager = {
     try {
       const cart = window.SmartGroceryData.getCart() || [];
       const budget = window.SmartGroceryData.getBudget();
+      const session = window.SmartGroceryData.getSession();
       const prices = window.SmartGroceryData.getPriceHistory() || [];
       const transactions = window.SmartGroceryData.getTransactions() || [];
 
-      // 1. Budget
+      // 1. Budget & Session
       if (budget) await this.saveBudget(budget);
+      if (session) await this.saveSession(session);
 
       // 2. Cart
       if (cart.length > 0) await this.syncAllCart(cart);
@@ -448,10 +495,14 @@ const FirebaseManager = {
     this.notifyStatus('connecting', { message: 'Mengambil data terbaru dari Cloud Firestore...' });
 
     try {
-      // 1. Budget
+      // 1. Budget & Session
       const budgetSnap = await getDoc(doc(db, COLLECTIONS.SETTINGS, DOCS.BUDGET));
       if (budgetSnap.exists()) {
         window.SmartGroceryData.set('sg_budget_config', budgetSnap.data());
+      }
+      const sessionSnap = await getDoc(doc(db, COLLECTIONS.SETTINGS, DOCS.SESSION));
+      if (sessionSnap.exists()) {
+        window.SmartGroceryData.set('sg_shopping_session', sessionSnap.data());
       }
 
       // 2. Cart

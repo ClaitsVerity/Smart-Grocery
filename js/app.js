@@ -17,6 +17,7 @@
     initNavigation();
     initPWAInstall();
     initFilterChips();
+    initSessionControls();
     initItemModal();
     initBudgetControls();
     initCheckoutModal();
@@ -44,6 +45,8 @@
     elements.toastMessage = document.getElementById('toastMessage');
 
     // Belanja Tab
+    elements.sessionStoreSelect = document.getElementById('sessionStoreSelect');
+    elements.sessionDatePicker = document.getElementById('sessionDatePicker');
     elements.budgetHeroCard = document.getElementById('budgetHeroCard');
     elements.budgetMonthLabel = document.getElementById('budgetMonthLabel');
     elements.budgetStatusBadge = document.getElementById('budgetStatusBadge');
@@ -630,6 +633,45 @@
   }
 
   // ==========================================================================
+  // SHOPPING SESSION CONTROLLER (Store Location & Date - F-01 & F-06A)
+  // ==========================================================================
+  function initSessionControls() {
+    if (!window.SmartGroceryData) return;
+    const session = window.SmartGroceryData.getSession() || {
+      store: 'Lotte Mart Grocery - Puri Indah',
+      date: '2026-10-26'
+    };
+
+    if (elements.sessionStoreSelect) {
+      if (session.store) {
+        elements.sessionStoreSelect.value = session.store;
+      }
+      elements.sessionStoreSelect.addEventListener('change', (e) => {
+        const cur = window.SmartGroceryData.getSession();
+        window.SmartGroceryData.saveSession({
+          ...cur,
+          store: e.target.value
+        });
+        showToast(`Lokasi toko: ${e.target.value}`, 'info');
+      });
+    }
+
+    if (elements.sessionDatePicker) {
+      if (session.date) {
+        elements.sessionDatePicker.value = session.date;
+      }
+      elements.sessionDatePicker.addEventListener('change', (e) => {
+        const cur = window.SmartGroceryData.getSession();
+        window.SmartGroceryData.saveSession({
+          ...cur,
+          date: e.target.value
+        });
+        showToast(`Tanggal belanja: ${e.target.value}`, 'info');
+      });
+    }
+  }
+
+  // ==========================================================================
   // ITEM MODAL CONTROLLER (F-01, F-02, F-03, F-04)
   // ==========================================================================
   let currentDiscountType = 'none';
@@ -931,17 +973,33 @@
   // Handle Save from Item Modal
   function handleSaveItemModal() {
     const name = (elements.inputItemName.value || '').trim();
-    const unitPrice = Number(elements.inputItemUnitPrice.value) || 0;
+    const rawPrice = (elements.inputItemUnitPrice.value || '').trim();
+    const unitPrice = Number(rawPrice);
     const qty = Number(elements.inputItemQty.value) || 1;
 
+    // F-01 & DT2 Skenario 1 Validation
     if (!name) {
-      alert('Mohon isi nama barang.');
+      showToast('⚠️ Nama barang wajib diisi! Tidak boleh kosong.', 'warning');
       elements.inputItemName.focus();
+      vibrate([40]);
       return;
     }
-    if (unitPrice <= 0) {
-      alert('Harga satuan harus lebih dari Rp 0.');
+    if (rawPrice === '' || isNaN(unitPrice) || unitPrice < 0) {
+      showToast('⚠️ Input ditolak: Harga tidak boleh negatif atau kosong!', 'warning');
       elements.inputItemUnitPrice.focus();
+      vibrate([40]);
+      return;
+    }
+    if (unitPrice === 0) {
+      showToast('⚠️ Harga satuan harus lebih dari Rp 0!', 'warning');
+      elements.inputItemUnitPrice.focus();
+      vibrate([40]);
+      return;
+    }
+    if (qty <= 0) {
+      showToast('⚠️ Kuantitas barang minimal 0.1!', 'warning');
+      elements.inputItemQty.focus();
+      vibrate([40]);
       return;
     }
 
@@ -1010,7 +1068,7 @@
   function openCheckoutModal() {
     const cartItems = window.SmartGroceryCart.getItems();
     if (!cartItems || cartItems.length === 0) {
-      alert('Keranjang belanja masih kosong! Tambahkan barang terlebih dahulu.');
+      showToast('⚠️ Keranjang belanja masih kosong! Tambahkan barang terlebih dahulu.', 'warning');
       return;
     }
 
@@ -1020,6 +1078,10 @@
     if (elements.coTotalSaved) elements.coTotalSaved.textContent = formatRp(status.totalDiscount);
     if (elements.coItemCount) elements.coItemCount.textContent = `${status.totalItemsCount} Barang`;
     if (elements.coBudgetLimit) elements.coBudgetLimit.textContent = formatRp(status.limit);
+
+    if (elements.coSupermarketInput && elements.sessionStoreSelect) {
+      elements.coSupermarketInput.value = elements.sessionStoreSelect.value || 'Lotte Mart Grocery - Puri Indah';
+    }
 
     if (elements.coBudgetStatusBadge) {
       elements.coBudgetStatusBadge.className = `budget-chip-status ${status.statusTheme}`;
@@ -1032,7 +1094,8 @@
 
   function handleConfirmCheckout() {
     try {
-      const supermarket = (elements.coSupermarketInput.value || '').trim() || 'Superindo Rantau';
+      const defaultStore = elements.sessionStoreSelect ? elements.sessionStoreSelect.value : 'Lotte Mart Grocery - Puri Indah';
+      const supermarket = (elements.coSupermarketInput.value || '').trim() || defaultStore;
       const receipt = window.SmartGroceryHistory.checkoutCurrentCart({ supermarket: supermarket });
 
       vibrate([50, 50, 100]);
@@ -1046,7 +1109,7 @@
         openReceiptModal(receipt.id);
       }, 300);
     } catch (err) {
-      alert(err.message || 'Gagal menyelesaikan belanja');
+      showToast('⚠️ ' + (err.message || 'Gagal menyelesaikan belanja'), 'warning');
     }
   }
 
@@ -1276,6 +1339,13 @@
     window.addEventListener('smartgrocery:data-changed', (e) => {
       if (window.SmartGroceryCart) {
         window.SmartGroceryCart.init();
+      }
+      if (window.SmartGroceryData && elements.sessionStoreSelect && elements.sessionDatePicker) {
+        const ses = window.SmartGroceryData.getSession();
+        if (ses) {
+          if (ses.store) elements.sessionStoreSelect.value = ses.store;
+          if (ses.date) elements.sessionDatePicker.value = ses.date;
+        }
       }
       renderAll();
     });

@@ -145,8 +145,8 @@
       const history = window.SmartGroceryData.getPriceHistory() || [];
       const clean = this.normalize(query);
       if (!clean) {
-        // Return top staples for quick chips
-        return history.slice(0, 6);
+        // Return top staples for quick chips (DT2 Test Items)
+        return history.slice(0, 8);
       }
       return history.filter(item => this.normalize(item.name).includes(clean)).slice(0, 5);
     }

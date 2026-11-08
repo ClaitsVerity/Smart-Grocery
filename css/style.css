@@ -787,7 +787,7 @@ html, body {
   border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Ergonomic Thumb Stepper (+ / -) */
+/* Ergonomic Thumb Stepper (+ / -) min 44x44px touch target (Skenario Uji 8) */
 .stepper-control {
   display: flex;
   align-items: center;
@@ -798,8 +798,10 @@ html, body {
   gap: 2px;
 }
 .btn-step {
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.04);
   border: none;
@@ -808,7 +810,7 @@ html, body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   transition: all 0.15s ease;
 }
@@ -820,9 +822,66 @@ html, body {
   min-width: 48px;
   text-align: center;
   font-family: var(--font-numeric);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--text-white);
+}
+
+/* Sesi Belanja (Lokasi Toko & Tanggal Belanja - SRS F-01 & F-06A) */
+.session-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  backdrop-filter: blur(12px);
+}
+.session-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.session-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.session-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.session-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.session-select,
+.session-date-input {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  color: var(--text-white);
+  font-size: 11px;
+  font-weight: 600;
+  outline: none;
+  transition: border-color 0.2s ease;
+  min-height: 38px;
+}
+.session-select:focus,
+.session-date-input:focus {
+  border-color: var(--emerald-400);
+}
+.session-date-input::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
 }
 
 .item-pricing-summary {

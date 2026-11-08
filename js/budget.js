@@ -91,14 +91,13 @@
         status = 'OVER';
         statusText = 'Over Budget!';
         statusTheme = 'danger';
-        const overAmt = totalNet - limit;
-        message = `🚨 Belanja melebihi budget Rp ${overAmt.toLocaleString('id-ID')}! Singkirkan item non-prioritas.`;
+        message = 'Total belanja melebihi batas saldo dompet! Kurangi kuantitas atau batalkan barang sekunder.';
         alertIcon = 'alert-octagon';
-      } else if (totalNet >= safeThreshold || percentUsed >= 85) {
+      } else if (percentUsed >= 90 || totalNet >= safeThreshold) {
         status = 'WARNING';
-        statusText = 'Mendekati Batas';
+        statusText = 'Peringatan Waspada';
         statusTheme = 'warning';
-        message = `⚠️ Sisa uang belanja menipis (${(100 - percentUsed).toFixed(1)}%). Hati-hati sebelum ke kasir!`;
+        message = `⚠️ Peringatan Waspada: Total belanja telah mencapai ${percentUsed.toFixed(0)}% dari batas saldo dompet! Hati-hati sebelum ke kasir.`;
         alertIcon = 'alert-triangle';
       }
 
